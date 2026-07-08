@@ -1,0 +1,42 @@
+.root-font{font-family:Inter,Segoe UI,Arial,sans-serif}
+*{box-sizing:border-box}
+body,html,#app{height:100%;margin:0}
+#app{display:flex;height:100vh;background:#f3f6fb}
+.sidebar{width:260px;background:linear-gradient(180deg,#071127,#0f172a);color:#cbd5e1;padding:28px 20px;display:flex;flex-direction:column}
+.sidebar .brand{font-weight:700;font-size:18px;margin-bottom:18px;color:#fff}
+.sidebar nav a{color:#9fb0c9;text-decoration:none;display:block;padding:12px 8px;border-radius:8px;margin:4px 0}
+.sidebar nav a:hover{background:rgba(255,255,255,0.03);color:#fff}
+.sidebar nav a.active{background:rgba(255,255,255,0.04);color:#fff}
+.main{flex:1;display:flex;flex-direction:column}
+.topnav{height:64px;padding:12px 20px;background:#fff;border-bottom:1px solid #eef2f7;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.topnav .search input{padding:10px;border-radius:8px;border:1px solid #e6edf3;width:360px;background:#f8fafc}
+.topnav .actions{display:flex;align-items:center;gap:12px}
+.avatar{width:36px;height:36px;border-radius:50%;background:#6b7280;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+#view{padding:28px 36px;overflow:auto}
+.kpi-row{display:flex;gap:18px;margin-bottom:18px}
+.card{background:#fff;padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(11,20,36,0.06);flex:1;min-width:0}
+.card .title{font-size:12px;color:#6b7280;margin-bottom:6px}
+.card .num{display:block;font-size:24px;font-weight:700;margin-top:6px;color:#0f172a}
+.card .pill{display:inline-block;margin-top:10px;background:#eefdf6;color:#065f46;padding:6px 8px;border-radius:999px;font-size:12px}
+.panel{background:#fff;padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(11,20,36,0.06)}
+.activity-list{margin:0;padding-left:18px}
+.table-wrap{background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(11,20,36,0.04);overflow:hidden}
+.table{width:100%;border-collapse:collapse}
+.table thead th{background:#fbfdff;color:#6b7280;text-align:left;padding:16px;border-bottom:1px solid #eef2f7}
+.table tbody td{Padding:16px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+.table tbody tr:hover{background:#fbfcfe}
+.table .muted{color:#64748b;font-size:13px}
+.status-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#ecfeef;color:#065f46;font-weight:600}
+.status-pill.draft{background:#fff7ed;color:#92400e}
+.difficulty{display:inline-block;padding:6px 10px;border-radius:999px;background:#eff6ff;color:#3730a3;font-weight:600}
+.progress{height:8px;background:#eef2f6;border-radius:999px;overflow:hidden;width:120px}
+.progress .bar{height:100%;background:linear-gradient(90deg,#6366f1,#7c3aed);width:0}
+.actions-row{display:flex;gap:12px;align-items:center}
+.btn{padding:10px 14px;border-radius:10px;border:1px solid transparent;background:#fff;color:#0f172a;cursor:pointer}
+.btn.ghost{background:#fff}
+.btn.primary{background:linear-gradient(90deg,#7c3aed,#6d28d9);color:#fff;border:none;box-shadow:0 6px 18px rgba(124,58,237,0.18)}
+.header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.page{max-width:1200px}
+form label{display:block;margin:8px 0}
+button{cursor:pointer}
+@media(max-width:900px){.sidebar{display:none}.topnav .search input{width:180px}}

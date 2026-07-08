@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iMocha | Skills Assessment Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --imocha-blue: #004165;
+            --imocha-orange: #ff6b35;
+            --sidebar-bg: #1e2128;
+            --bg-main: #f3f7f9;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            background-color: var(--sidebar-bg);
+            width: 80px;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 50;
+        }
+
+        .sidebar:hover {
+            width: 240px;
+        }
+
+        .sidebar .nav-text {
+            display: none;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar:hover .nav-text {
+            display: inline;
+            opacity: 1;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            color: #94a3b8;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            position: relative;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background-color: #2d3139;
+            color: white;
+        }
+
+        .sidebar-item.active {
+            border-left-color: var(--imocha-orange);
+            background-color: rgba(255, 107, 53, 0.1);
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--imocha-orange);
+        }
+
+        .hero-banner {
+            background: linear-gradient(135deg, #002e47 0%, #004165 100%);
+            border-radius: 16px;
+            position: relative;
+        }
+
+        .tag-pill {
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .active-status { background: #dcfce7; color: #166534; }
+        .completed-status { background: #eff6ff; color: #1d4ed8; }
+        
+        .level-expert { color: #ea580c; background: #fff7ed; }
+        .level-mid { color: #2563eb; background: #eff6ff; }
+
+        #login-screen {
+            background: radial-gradient(circle at top right, #004165, #001a29);
+        }
+
+        #profile-dropdown {
+            transform-origin: top right;
+            transition: all 0.2s ease;
+        }
+        #profile-dropdown.hidden {
+            display: none;
+            transform: scale(0.95);
+            opacity: 0;
+        }
+
+        .progress-bar-fill {
+            transition: width 1s ease-in-out;
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="fixed inset-0 z-[1000] flex items-center justify-center p-6 hidden">
+        <div class="bg-white rounded-3xl w-full max-w-md p-10 shadow-2xl">
+            <div class="flex items-center gap-4 mb-8">
+                <!-- iMocha Logo SVG -->
+                <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                    <svg viewBox="0 0 100 100" class="w-10 h-10 fill-[#ff6b35]">
+                        <path d="M50 15 A35 35 0 0 0 15 50 L25 50 A25 25 0 0 1 50 25 Z" />
+                        <path d="M15 50 A35 35 0 0 0 50 85 L50 75 A25 25 0 0 1 25 50 Z" />
+                        <path d="M50 85 A35 35 0 0 0 85 50 L75 50 A25 25 0 0 1 50 75 Z" />
+                        <path d="M85 50 A35 35 0 0 0 50 15 L50 25 A25 25 0 0 1 75 50 Z" />
+                        <circle cx="75" cy="25" r="12" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-[#004165]">iMocha</h2>
+                    <p class="text-sm text-gray-500">Skills Assessment Platform</p>
+                </div>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Email</label>
+                    <input type="email" value="admin@imocha.io" class="w-full px-4 py-3 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-[#ff6b35]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Password</label>
+                    <input type="password" value="••••••••" class="w-full px-4 py-3 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-[#ff6b35]">
+                </div>
+                <button onclick="handleLogin()" class="w-full bg-[#004165] text-white py-4 rounded-xl font-bold hover:bg-[#002e47] transition shadow-lg">
+                    Sign In
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside id="main-sidebar" class="sidebar fixed h-full flex flex-col overflow-hidden">
+        <div class="p-4 mb-4">
+            <div class="flex items-center gap-3">
+                <!-- iMocha Logo SVG -->
+                <div class="w-10 h-10 flex items-center justify-center shrink-0">
+                    <svg viewBox="0 0 100 100" class="w-8 h-8 fill-[#ff6b35]">
+                        <path d="M50 15 A35 35 0 0 0 15 50 L25 50 A25 25 0 0 1 50 25 Z" />
+                        <path d="M15 50 A35 35 0 0 0 50 85 L50 75 A25 25 0 0 1 25 50 Z" />
+                        <path d="M50 85 A35 35 0 0 0 85 50 L75 50 A25 25 0 0 1 50 75 Z" />
+                        <path d="M85 50 A35 35 0 0 0 50 15 L50 25 A25 25 0 0 1 75 50 Z" />
+                        <circle cx="75" cy="25" r="12" />
+                    </svg>
+                </div>
+                <div class="nav-text font-bold text-white text-xl tracking-tight">iMocha</div>
+            </div>
+        </div>
+
+        <nav class="flex-1">
+            <div class="sidebar-item active" onclick="switchTab('dashboard')">
+                <i class="fas fa-th-large w-6 text-xl"></i>
+                <span class="nav-text ml-4 font-medium">Dashboard</span>
+            </div>
+            <div class="sidebar-item" onclick="switchTab('assessments')">
+                <i class="fas fa-clipboard-list w-6 text-xl"></i>
+                <span class="nav-text ml-4 font-medium">Assessments</span>
+            </div>
+            <div class="sidebar-item" onclick="switchTab('candidates')">
+                <i class="fas fa-users w-6 text-xl"></i>
+                <span class="nav-text ml-4 font-medium">Candidates</span>
+            </div>
+            <div class="sidebar-item" onclick="switchTab('analytics')">
+                <i class="fas fa-chart-line w-6 text-xl"></i>
+                <span class="nav-text ml-4 font-medium">Analytics</span>
+            </div>
+        </nav>
+
+        <div class="mt-auto mb-4">
+            <div class="sidebar-item" onclick="switchTab('settings')">
+                <i class="fas fa-cog w-6 text-xl"></i>
+                <span class="nav-text ml-4 font-medium">Settings</span>
+            </div>
+            <div class="sidebar-item" onclick="handleLogout()">
+                <i class="fas fa-sign-out-alt w-6 text-xl"></i>
+                <span class="nav-text ml-4 font-medium">Logout</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 ml-20 p-8">
+        <!-- HEADER -->
+        <header class="flex justify-between items-center mb-8">
+            <div class="text-sm text-gray-400 font-medium">
+                iMocha / <span class="text-[#004165] font-bold" id="current-page-title">Dashboard</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <!-- Updated Search Bar Placeholder -->
+                <div class="bg-white border rounded-lg px-4 py-2 flex items-center gap-2 w-64 shadow-sm">
+                    <i class="fas fa-search text-gray-300"></i>
+                    <input type="text" placeholder="Search" class="text-sm outline-none w-full">
+                </div>
+                <div class="relative">
+                    <div class="flex items-center gap-3 pl-4 border-l cursor-pointer group" onclick="toggleProfileDropdown(event)">
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-[#004165] group-hover:text-[#ff6b35]">Aachal Kamble</p>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Administrator</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-[#ff6b35] flex items-center justify-center text-white font-bold shadow-md">
+                            AK
+                        </div>
+                    </div>
+                    <!-- Dropdown -->
+                    <div id="profile-dropdown" class="absolute right-0 mt-3 w-52 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[60] hidden">
+                        <button onclick="switchTab('settings')" class="w-full text-left px-4 py-2 text-sm hover:bg-orange-50 hover:text-orange-600 transition flex items-center gap-3">
+                            <i class="fas fa-user-circle"></i> Profile Settings
+                        </button>
+                        <button onclick="handleLogout()" class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition flex items-center gap-3">
+                            <i class="fas fa-power-off"></i> Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- DASHBOARD -->
+        <div id="dashboard-content" class="page-view">
+            <div class="hero-banner p-10 text-white flex justify-between items-center mb-10 overflow-hidden">
+                <div class="z-10">
+                    <h1 class="text-3xl font-extrabold mb-2">Welcome to iMocha Platform</h1>
+                    <p class="text-blue-100 text-lg opacity-80 mb-6">You have 1,420 candidates appeared for tests this week.</p>
+                    <div class="flex gap-4">
+                        <button onclick="switchTab('assessments')" class="bg-[#ff6b35] hover:bg-[#e65a2b] px-6 py-3 rounded-xl font-bold shadow-lg transition flex items-center gap-2">
+                            New Assessment <i class="fas fa-plus-circle"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- Background decoration element -->
+                <div class="absolute right-[-40px] top-[-40px] opacity-10">
+                   <svg viewBox="0 0 100 100" class="w-64 h-64 fill-white">
+                        <path d="M50 15 A35 35 0 0 0 15 50 L25 50 A25 25 0 0 1 50 25 Z" />
+                        <path d="M15 50 A35 35 0 0 0 50 85 L50 75 A25 25 0 0 1 25 50 Z" />
+                        <path d="M50 85 A35 35 0 0 0 85 50 L75 50 A25 25 0 0 1 50 75 Z" />
+                        <path d="M85 50 A35 35 0 0 0 50 15 L50 25 A25 25 0 0 1 75 50 Z" />
+                        <circle cx="75" cy="25" r="12" />
+                    </svg>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <div class="stat-card">
+                    <p class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4">Candidates Invited</p>
+                    <div class="flex items-end justify-between">
+                        <h3 class="text-3xl font-bold text-[#004165]">4,820</h3>
+                        <span class="text-green-500 text-xs font-bold bg-green-50 px-2 py-1 rounded">+14%</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <p class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4">Candidates Appeared</p>
+                    <div class="flex items-end justify-between">
+                        <h3 class="text-3xl font-bold text-[#004165]">3,241</h3>
+                        <span class="text-green-500 text-xs font-bold bg-green-50 px-2 py-1 rounded">67% Conv.</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <p class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4">Completion Rate</p>
+                    <div class="flex items-end justify-between">
+                        <h3 class="text-3xl font-bold text-[#004165]">76.4%</h3>
+                        <div class="w-16 bg-gray-100 h-1.5 rounded-full overflow-hidden mb-2">
+                            <div class="bg-[#ff6b35] h-full w-[76%]"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <p class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4">Total Assessments</p>
+                    <div class="flex items-end justify-between">
+                        <h3 class="text-3xl font-bold text-[#004165]">58</h3>
+                        <span class="text-blue-500 text-xs font-bold bg-blue-50 px-2 py-1 rounded">Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 bg-white p-8 rounded-2xl border">
+                    <h3 class="font-bold text-lg mb-6">Recent Test Performance</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded bg-blue-50 flex items-center justify-center text-blue-600"><i class="fas fa-code"></i></div>
+                            <div class="flex-1">
+                                <div class="flex justify-between mb-1"><span class="text-sm font-bold">React.js Advanced</span><span class="text-xs text-gray-400">82% Avg</span></div>
+                                <div class="w-full bg-gray-50 h-2 rounded-full"><div class="bg-blue-500 h-full rounded-full" style="width: 82%"></div></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded bg-orange-50 flex items-center justify-center text-orange-600"><i class="fas fa-database"></i></div>
+                            <div class="flex-1">
+                                <div class="flex justify-between mb-1"><span class="text-sm font-bold">SQL Database Expert</span><span class="text-xs text-gray-400">65% Avg</span></div>
+                                <div class="w-full bg-gray-50 h-2 rounded-full"><div class="bg-orange-500 h-full rounded-full" style="width: 65%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-2xl border">
+                    <h3 class="font-bold text-lg mb-6">System Health</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center py-2 border-b">
+                            <span class="text-sm text-gray-500">Integrations</span>
+                            <span class="text-xs font-bold text-green-500 flex items-center gap-1"><i class="fas fa-check-circle"></i> Connected</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b">
+                            <span class="text-sm text-gray-500">API Uptime</span>
+                            <span class="text-xs font-bold text-blue-500">99.9%</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-sm text-gray-500">Storage</span>
+                            <span class="text-xs font-bold text-gray-800">1.2 GB / 5 GB</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYTICS -->
+        <div id="analytics-content" class="page-view hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-2xl font-bold text-[#004165]">Advanced Analytics</h1>
+                <div class="flex gap-2">
+                    <button class="bg-white border px-4 py-2 rounded-lg text-sm font-bold">Last 30 Days</button>
+                    <button class="bg-[#004165] text-white px-4 py-2 rounded-lg text-sm font-bold">Download Report</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <!-- Score Distribution -->
+                <div class="bg-white p-6 rounded-2xl border shadow-sm">
+                    <h3 class="font-bold text-sm text-gray-400 uppercase tracking-widest mb-6">Score Distribution</h3>
+                    <div class="flex items-end justify-around h-48 gap-2 pt-4">
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-slate-100 rounded-t-md h-12"></div>
+                            <span class="text-[10px] mt-2 font-bold text-gray-400">0-20</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-slate-200 rounded-t-md h-24"></div>
+                            <span class="text-[10px] mt-2 font-bold text-gray-400">21-40</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-orange-400 rounded-t-md h-40"></div>
+                            <span class="text-[10px] mt-2 font-bold text-gray-400">41-60</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-[#004165] rounded-t-md h-32"></div>
+                            <span class="text-[10px] mt-2 font-bold text-gray-400">61-80</span>
+                        </div>
+                        <div class="flex flex-col items-center flex-1">
+                            <div class="w-full bg-green-500 rounded-t-md h-16"></div>
+                            <span class="text-[10px] mt-2 font-bold text-gray-400">81-100</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Category -->
+                <div class="bg-white p-6 rounded-2xl border shadow-sm flex flex-col items-center justify-center">
+                    <h3 class="font-bold text-sm text-gray-400 uppercase tracking-widest mb-8 w-full">Performance Category</h3>
+                    <div class="relative w-32 h-32 rounded-full border-[10px] border-slate-50 flex items-center justify-center">
+                        <div class="absolute inset-0 border-[10px] border-orange-500 border-b-transparent border-l-transparent rounded-full rotate-45"></div>
+                        <div class="text-center">
+                            <p class="text-2xl font-extrabold text-[#004165]">64%</p>
+                            <p class="text-[9px] font-bold text-gray-400">PROFICIENT</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 w-full space-y-2">
+                        <div class="flex justify-between text-[10px] font-bold">
+                            <span class="text-gray-400 uppercase">Expert</span>
+                            <span class="text-green-500">22%</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-bold">
+                            <span class="text-gray-400 uppercase">Intermediate</span>
+                            <span class="text-orange-500">42%</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-bold">
+                            <span class="text-gray-400 uppercase">Beginner</span>
+                            <span class="text-slate-400">36%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Skills Used -->
+                <div class="bg-white p-6 rounded-2xl border shadow-sm">
+                    <h3 class="font-bold text-sm text-gray-400 uppercase tracking-widest mb-6">Top Skills Evaluated</h3>
+                    <div class="space-y-5">
+                        <div class="flex items-center gap-3">
+                            <span class="text-[10px] font-bold text-gray-800 w-24 truncate">React.js</span>
+                            <div class="flex-1 bg-gray-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-[#004165] h-full" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-[10px] font-bold text-gray-800 w-24 truncate">Python</span>
+                            <div class="flex-1 bg-gray-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-[#ff6b35] h-full" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-[10px] font-bold text-gray-800 w-24 truncate">Java</span>
+                            <div class="flex-1 bg-gray-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-blue-400 h-full" style="width: 60%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-[10px] font-bold text-gray-800 w-24 truncate">AWS</span>
+                            <div class="flex-1 bg-gray-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-slate-400 h-full" style="width: 45%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="settings-content" class="page-view hidden">
+            <h1 class="text-2xl font-bold text-[#004165] mb-8">Settings</h1>
+            
+            <div class="max-w-2xl bg-white border rounded-2xl p-8 shadow-sm space-y-12">
+                <!-- Change Name -->
+                <div>
+                    <h3 class="font-bold text-lg mb-6 flex items-center gap-2">
+                        <i class="fas fa-id-card text-[#ff6b35]"></i> Update Profile Name
+                    </h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-gray-400 uppercase">First Name</label>
+                            <input type="text" value="Aachal" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-[#ff6b35] outline-none">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-gray-400 uppercase">Last Name</label>
+                            <input type="text" value="Kamble" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-[#ff6b35] outline-none">
+                        </div>
+                    </div>
+                    <button onclick="showToast('Profile Name Updated')" class="mt-4 bg-[#004165] text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-[#002e47] transition">Save Name</button>
+                </div>
+
+                <hr class="border-gray-50">
+
+                <!-- Change Password -->
+                <div>
+                    <h3 class="font-bold text-lg mb-6 flex items-center gap-2">
+                        <i class="fas fa-key text-[#ff6b35]"></i> Change Password
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-gray-400 uppercase">New Password</label>
+                            <input type="password" placeholder="••••••••" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-[#ff6b35] outline-none">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-gray-400 uppercase">Confirm Password</label>
+                            <input type="password" placeholder="••••••••" class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-[#ff6b35] outline-none">
+                        </div>
+                    </div>
+                    <button onclick="showToast('Password Changed Successfully')" class="mt-4 bg-[#004165] text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-[#002e47] transition">Update Password</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ASSESSMENT LIST -->
+        <div id="assessments-content" class="page-view hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-2xl font-bold text-[#004165]">Test Library</h1>
+                <button onclick="toggleModal(true)" class="bg-[#ff6b35] text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-orange-500/20">Create Assessment</button>
+            </div>
+            <div class="bg-white rounded-xl border overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b">
+                        <tr class="text-left text-[10px] font-bold text-gray-400 uppercase">
+                            <th class="px-8 py-4">Title</th>
+                            <th class="px-8 py-4">Status</th>
+                            <th class="px-8 py-4">Questions</th>
+                            <th class="px-8 py-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assessment-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CANDIDATE LIST -->
+        <div id="candidates-content" class="page-view hidden">
+            <h1 class="text-2xl font-bold text-[#004165] mb-8">Candidate Pipeline</h1>
+            <div class="bg-white rounded-xl border overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b">
+                        <tr class="text-left text-[10px] font-bold text-gray-400 uppercase">
+                            <th class="px-8 py-4">Candidate</th>
+                            <th class="px-8 py-4">Assessment</th>
+                            <th class="px-8 py-4">Score</th>
+                            <th class="px-8 py-4">Result</th>
+                        </tr>
+                    </thead>
+                    <tbody id="candidate-list"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- NOTIFICATION -->
+    <div id="toast" class="fixed bottom-10 right-10 bg-[#004165] text-white px-6 py-4 rounded-xl shadow-2xl transition-all duration-500 transform translate-y-24 opacity-0 pointer-events-none z-[1100] flex items-center gap-3">
+        <i class="fas fa-check-circle text-[#ff6b35]"></i>
+        <span id="toast-message" class="text-sm font-bold">Success!</span>
+    </div>
+
+    <!-- MODAL -->
+    <div id="modal-overlay" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h3 class="text-xl font-bold text-[#004165]">New Assessment</h3>
+                <button onclick="toggleModal(false)" class="text-gray-400 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="text" id="new-test-name" placeholder="Assessment Title" class="w-full px-4 py-3 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-[#ff6b35]">
+                <div class="grid grid-cols-2 gap-4">
+                    <select id="new-test-category" class="w-full px-4 py-3 bg-gray-50 border rounded-xl outline-none">
+                        <option>Coding</option>
+                        <option>Communication</option>
+                        <option>Management</option>
+                    </select>
+                    <input type="number" id="new-test-questions" value="20" class="w-full px-4 py-3 bg-gray-50 border rounded-xl outline-none">
+                </div>
+            </div>
+            <div class="p-6 border-t flex justify-end gap-3">
+                <button onclick="toggleModal(false)" class="px-4 py-2 font-bold text-gray-400">Cancel</button>
+                <button onclick="addAssessment()" class="bg-[#004165] text-white px-6 py-2 rounded-lg font-bold">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let assessments = [
+            { id: 1, name: 'Senior React Developer Assessment', questions: 45, status: 'Active' },
+            { id: 2, name: 'Python Engineering Fundamentals', questions: 30, status: 'Active' },
+            { id: 3, name: 'AWS Cloud Architecture', questions: 60, status: 'Active' }
+        ];
+
+        let candidates = [
+            { name: 'John Doe', test: 'Senior React Developer', score: '92%', status: 'Passed' },
+            { name: 'Sarah Miller', test: 'Senior React Developer', score: '88%', status: 'Passed' },
+            { name: 'Rachel Zane', test: 'AWS Cloud Architecture', score: '95%', status: 'Passed' },
+            { name: 'Mike Ross', test: 'Python Engineering', score: '42%', status: 'Failed' }
+        ];
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.page-view').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            
+            document.getElementById(tabId + '-content').classList.remove('hidden');
+            document.getElementById('current-page-title').innerText = tabId.charAt(0).toUpperCase() + tabId.slice(1);
+            
+            const activeNav = Array.from(document.querySelectorAll('.sidebar-item')).find(item => 
+                item.innerText.toLowerCase().includes(tabId)
+            );
+            if(activeNav) activeNav.classList.add('active');
+
+            if(tabId === 'assessments') renderAssessments();
+            if(tabId === 'candidates') renderCandidates();
+        }
+
+        function toggleProfileDropdown(e) {
+            e.stopPropagation();
+            document.getElementById('profile-dropdown').classList.toggle('hidden');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 3000);
+        }
+
+        function toggleModal(show) {
+            document.getElementById('modal-overlay').classList.toggle('hidden', !show);
+            document.getElementById('modal-overlay').classList.toggle('flex', show);
+        }
+
+        function renderAssessments() {
+            const list = document.getElementById('assessment-list');
+            list.innerHTML = assessments.map(item => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-8 py-5 font-bold text-[#004165]">${item.name}</td>
+                    <td class="px-8 py-5"><span class="tag-pill active-status">Active</span></td>
+                    <td class="px-8 py-5 text-gray-400 text-sm">${item.questions} Qs</td>
+                    <td class="px-8 py-5 text-right"><button class="text-gray-300 hover:text-orange-500"><i class="fas fa-ellipsis-h"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderCandidates() {
+            const list = document.getElementById('candidate-list');
+            list.innerHTML = candidates.map(c => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-8 py-5 font-bold text-[#004165]">${c.name}</td>
+                    <td class="px-8 py-5 text-gray-500 text-sm">${c.test}</td>
+                    <td class="px-8 py-5 font-bold ${parseFloat(c.score) > 50 ? 'text-green-500' : 'text-red-500'}">${c.score}</td>
+                    <td class="px-8 py-5"><span class="tag-pill ${c.status === 'Passed' ? 'active-status' : 'completed-status'}">${c.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function addAssessment() {
+            const name = document.getElementById('new-test-name').value;
+            if(!name) return showToast("Title required!");
+            assessments.unshift({ id: Date.now(), name, questions: document.getElementById('new-test-questions').value, status: 'Active' });
+            renderAssessments();
+            toggleModal(false);
+            showToast("Test Library Updated");
+        }
+
+        function handleLogout() {
+            document.getElementById('main-sidebar').classList.add('hidden');
+            document.querySelector('main').classList.add('opacity-0');
+            document.getElementById('login-screen').classList.remove('hidden');
+        }
+
+        function handleLogin() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-sidebar').classList.remove('hidden');
+            document.querySelector('main').classList.remove('opacity-0');
+            switchTab('dashboard');
+        }
+
+        window.onclick = () => document.getElementById('profile-dropdown').classList.add('hidden');
+
+        window.onload = () => {
+            renderAssessments();
+            renderCandidates();
+        };
+    </script>
+</body>
+</html>
